@@ -2,110 +2,85 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>StarterBiz AI – Learn Business Basics</title>
+  <title>StarterBiz AI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #0f172a; color: #e5e7eb; }
-    header { padding: 20px; text-align: center; background: #020617; }
-    h1 { margin: 0; font-size: 28px; }
-    h2 { color: #38bdf8; }
-    a { color: #38bdf8; text-decoration: none; }
-    nav { margin-top: 10px; }
-    nav a { margin: 0 10px; font-size: 14px; }
-    .container { max-width: 900px; margin: 20px auto; padding: 0 16px 40px; }
-    .card { background: #020617; border-radius: 10px; padding: 18px 20px; margin-bottom: 18px; border: 1px solid #1f2937; }
-    .pill { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 11px; background: #0ea5e9; color: #0b1120; font-weight: bold; }
-    button { background: #0ea5e9; border: none; color: #0b1120; padding: 10px 16px; border-radius: 999px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+    body { margin: 0; font-family: 'Inter', sans-serif; background: #0d1117; color: #e6edf3; }
+    header { padding: 40px 20px; text-align: center; background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; }
+    header h1 { font-size: 42px; margin: 0; font-weight: 700; }
+    header p { font-size: 18px; opacity: 0.9; }
+
+    nav { margin-top: 20px; }
+    nav a { margin: 0 12px; color: white; text-decoration: none; font-weight: 600; }
+
+    .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+
+    .section { background: #161b22; padding: 30px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #30363d; }
+    .section h2 { margin-top: 0; color: #58a6ff; }
+
+    button { background: #0ea5e9; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; color: #0d1117; }
     button:hover { background: #38bdf8; }
-    footer { text-align: center; font-size: 11px; color: #9ca3af; padding-bottom: 20px; }
-    .two-col { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; }
-    @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
-    textarea { width: 100%; min-height: 120px; border-radius: 8px; border: 1px solid #1f2937; padding: 8px; background: #020617; color: #e5e7eb; }
+
+    textarea { width: 100%; min-height: 140px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 10px; color: #e6edf3; font-size: 15px; }
+
+    footer { text-align: center; padding: 20px; font-size: 13px; color: #8b949e; margin-top: 40px; }
   </style>
 </head>
+
 <body>
-  <header>
-    <h1>StarterBiz AI</h1>
-    <p>Simple answers for teens who want to learn business.</p>
-    <nav>
-      <a href="#start">Start</a>
-      <a href="#basics">Business basics</a>
-      <a href="#ai">Ask the AI</a>
-    </nav>
-  </header>
 
-  <div class="container">
-    <section id="start" class="card">
-      <span class="pill">Start here</span>
-      <h2>Learn business without being a “business person”</h2>
-      <p>
-        This site is made for beginners and teens. No fancy words, no boring textbooks.
-        Just clear explanations about how business works and how people actually make money.
-      </p>
-      <button onclick="document.getElementById('basics').scrollIntoView({behavior:'smooth'})">
-        Start learning the basics
-      </button>
-    </section>
+<header>
+  <h1>StarterBiz AI</h1>
+  <p>Learn business the simple way — made for teens, beginners, and future entrepreneurs.</p>
+  <nav>
+    <a href="#start">Start</a>
+    <a href="#basics">Basics</a>
+    <a href="#ai">Ask AI</a>
+  </nav>
+</header>
 
-    <section id="basics" class="card">
-      <h2>Business basics</h2>
-      <div class="two-col">
-        <div>
-          <h3>What is a business?</h3>
-          <p>
-            A business is just a system that:
-            <br>1) Solves a problem for someone
-            <br>2) Gets paid for solving it
-          </p>
+<div class="container">
 
-          <h3>How do people get ideas?</h3>
-          <p>
-            Most ideas come from noticing problems:
-            <br>• Something is annoying or slow  
-            <br>• Something is too expensive  
-            <br>• Something doesn’t exist yet but should
-          </p>
-
-          <h3>How do you make money with no money?</h3>
-          <p>
-            You trade your time and skills instead of cash.  
-            Examples: designing, editing, writing, tutoring, managing communities.
-          </p>
-        </div>
-        <div>
-          <h3>Common beginner mistakes</h3>
-          <ul>
-            <li>Trying to be “perfect” before starting</li>
-            <li>Copying others without understanding the problem they solve</li>
-            <li>Quitting after the first failure</li>
-          </ul>
-          <p>
-            The goal isn’t to build a huge company at 14.  
-            The goal is to learn how business works while you’re young.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section id="ai" class="card">
-      <h2>Ask the AI about business</h2>
-      <p>
-        Type a question like:
-        <br>• “Give me 3 business ideas for a 14‑year‑old with no money.”  
-        <br>• “Explain profit and expenses in simple words.”  
-        <br>• “How can I find my first customer?”
-      </p>
-
-      <!-- Placeholder “AI” box for now -->
-      <textarea placeholder="Type your question here... (In a real version, this would be an AI chat box.)"></textarea>
-      <p style="font-size: 12px; color: #9ca3af; margin-top: 6px;">
-        To turn this into a real AI chat, you can embed a chatbot from a tool like Chatbase or Botpress here.
-      </p>
-    </section>
+  <div id="start" class="section">
+    <h2>Start Here</h2>
+    <p>Business doesn’t need to be confusing. This site explains everything in simple language so you can actually understand it — even if you’re just starting out.</p>
+    <button onclick="document.getElementById('basics').scrollIntoView({behavior:'smooth'})">Learn the Basics</button>
   </div>
 
-  <footer>
-    StarterBiz AI • Created by a teen, for teens learning business.
-  </footer>
+  <div id="basics" class="section">
+    <h2>Business Basics</h2>
+    <p><strong>What is a business?</strong><br>A business is something that solves a problem and gets paid for solving it.</p>
+
+    <p><strong>Where do ideas come from?</strong><br>Ideas come from noticing problems: things that are slow, annoying, expensive, or missing.</p>
+
+    <p><strong>How do you make money with no money?</strong><br>You trade your time and skills instead of cash — like editing, designing, tutoring, or managing communities.</p>
+
+    <p><strong>Common beginner mistakes:</strong></p>
+    <ul>
+      <li>Trying to be perfect before starting</li>
+      <li>Copying others without understanding the problem they solve</li>
+      <li>Quitting after the first failure</li>
+    </ul>
+  </div>
+
+  <div id="ai" class="section">
+    <h2>Ask the AI</h2>
+    <p>Ask anything about business, like:</p>
+    <ul>
+      <li>“Give me 3 business ideas for a 14-year-old.”</li>
+      <li>“Explain profit in simple words.”</li>
+      <li>“How do I get my first customer?”</li>
+    </ul>
+
+    <textarea placeholder="Type your question here..."></textarea>
+    <p style="font-size: 12px; color: #8b949e;">(This will become a real AI chat box later.)</p>
+  </div>
+
+</div>
+
+<footer>
+  StarterBiz AI • Built for young entrepreneurs.
+</footer>
+
 </body>
 </html>
