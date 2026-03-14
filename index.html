@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>StarterBiz AI</title>
+  <title>GreenEdge Garden & Fencing Services</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { margin: 0; font-family: 'Inter', sans-serif; background: #0d1117; color: #e6edf3; }
-    header { padding: 40px 20px; text-align: center; background: linear-gradient(135deg, #0ea5e9, #2563eb); color: white; }
+    body { margin: 0; font-family: 'Inter', sans-serif; background: #f3f4f6; color: #1f2937; }
+    header { padding: 40px 20px; text-align: center; background: linear-gradient(135deg, #16a34a, #065f46); color: white; }
     header h1 { font-size: 42px; margin: 0; font-weight: 700; }
     header p { font-size: 18px; opacity: 0.9; }
 
@@ -15,71 +15,80 @@
 
     .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
 
-    .section { background: #161b22; padding: 30px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #30363d; }
-    .section h2 { margin-top: 0; color: #58a6ff; }
+    .section { background: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #d1d5db; }
+    .section h2 { margin-top: 0; color: #065f46; }
 
-    button { background: #0ea5e9; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; color: #0d1117; }
-    button:hover { background: #38bdf8; }
+    ul { padding-left: 20px; }
 
-    textarea { width: 100%; min-height: 140px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 10px; color: #e6edf3; font-size: 15px; }
+    button { background: #16a34a; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; color: white; }
+    button:hover { background: #22c55e; }
 
-    footer { text-align: center; padding: 20px; font-size: 13px; color: #8b949e; margin-top: 40px; }
+    textarea { width: 100%; min-height: 140px; background: #f9fafb; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px; color: #1f2937; font-size: 15px; }
+
+    footer { text-align: center; padding: 20px; font-size: 13px; color: #6b7280; margin-top: 40px; }
   </style>
 </head>
 
 <body>
 
 <header>
-  <h1>StarterBiz AI</h1>
-  <p>Learn business the simple way — made for teens, beginners, and future entrepreneurs.</p>
+  <h1>GreenEdge Garden & Fencing</h1>
+  <p>Local gardening, fencing, hedge trimming, lawn care, and outdoor maintenance in Stafford.</p>
   <nav>
-    <a href="#start">Start</a>
-    <a href="#basics">Basics</a>
+    <a href="#services">Services</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
     <a href="#ai">Ask AI</a>
   </nav>
 </header>
 
 <div class="container">
 
-  <div id="start" class="section">
-    <h2>Start Here</h2>
-    <p>Business doesn’t need to be confusing. This site explains everything in simple language so you can actually understand it — even if you’re just starting out.</p>
-    <button onclick="document.getElementById('basics').scrollIntoView({behavior:'smooth'})">Learn the Basics</button>
+  <div id="about" class="section">
+    <h2>About the Business</h2>
+    <p>GreenEdge is a small, local garden and fencing service inspired by my dad’s old business. I’m bringing it back with modern tools, fair prices, and a focus on quality work for homes in Stafford and nearby areas.</p>
+    <p>Whether you need your garden tidied, a fence repaired, or regular lawn care, I can help.</p>
   </div>
 
-  <div id="basics" class="section">
-    <h2>Business Basics</h2>
-    <p><strong>What is a business?</strong><br>A business is something that solves a problem and gets paid for solving it.</p>
-
-    <p><strong>Where do ideas come from?</strong><br>Ideas come from noticing problems: things that are slow, annoying, expensive, or missing.</p>
-
-    <p><strong>How do you make money with no money?</strong><br>You trade your time and skills instead of cash — like editing, designing, tutoring, or managing communities.</p>
-
-    <p><strong>Common beginner mistakes:</strong></p>
+  <div id="services" class="section">
+    <h2>Services Offered</h2>
     <ul>
-      <li>Trying to be perfect before starting</li>
-      <li>Copying others without understanding the problem they solve</li>
-      <li>Quitting after the first failure</li>
+      <li><strong>Lawn mowing & edging</strong></li>
+      <li><strong>Hedge trimming & shaping</strong></li>
+      <li><strong>Fence repairs & new fence installation</strong></li>
+      <li><strong>Garden clean‑ups</strong> (weeds, leaves, overgrowth)</li>
+      <li><strong>Pressure washing</strong> (patios, driveways, decking)</li>
+      <li><strong>Planting & small landscaping</strong></li>
+      <li><strong>Waste removal</strong> (green waste only)</li>
     </ul>
+    <button onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Get a Quote</button>
+  </div>
+
+  <div id="contact" class="section">
+    <h2>Contact</h2>
+    <p>Based in Stafford, serving surrounding areas.</p>
+    <p><strong>Email:</strong> your-email-here@example.com</p>
+    <p><strong>Phone:</strong> your-number-here</p>
+    <p><strong>Hours:</strong> Mon–Sat, 9am–6pm</p>
   </div>
 
   <div id="ai" class="section">
     <h2>Ask the AI</h2>
-    <p>Ask anything about business, like:</p>
+    <p>Ask anything about gardening, fencing, lawn care, or outdoor maintenance:</p>
     <ul>
-      <li>“Give me 3 business ideas for a 14-year-old.”</li>
-      <li>“Explain profit in simple words.”</li>
-      <li>“How do I get my first customer?”</li>
+      <li>“How often should I cut my grass?”</li>
+      <li>“What’s the best way to fix a leaning fence?”</li>
+      <li>“How do I stop weeds coming back?”</li>
     </ul>
 
     <textarea placeholder="Type your question here..."></textarea>
-    <p style="font-size: 12px; color: #8b949e;">(This will become a real AI chat box later.)</p>
+    <p style="font-size: 12px; color: #6b7280;">(This will become a real AI chat box later.)</p>
   </div>
 
 </div>
 
 <footer>
-  StarterBiz AI • Built for young entrepreneurs.
+  GreenEdge Garden & Fencing • Stafford, UK
 </footer>
 
 </body>
