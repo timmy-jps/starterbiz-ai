@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Neon Dash Runner</title>
+  <title>Stick TD Lite</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
+      background: #020617;
       color: #e5e7eb;
       display: flex;
       flex-direction: column;
@@ -42,21 +42,43 @@
       text-shadow: 0 0 4px #000;
     }
     #hud div { margin-bottom: 2px; }
-    #shopBtn {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      font-size: 12px;
-      padding: 4px 8px;
+
+    #bottomBar {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .towerBtn {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #4b5563;
+      background: #0f172a;
+      color: #e5e7eb;
+      cursor: pointer;
+    }
+    .towerBtn.selected {
+      border-color: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+    }
+    .towerBtn span {
+      display: block;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    #startWaveBtn {
+      padding: 6px 12px;
       border-radius: 6px;
       border: none;
       background: #22c55e;
       color: #022c22;
+      font-weight: bold;
       cursor: pointer;
+      font-size: 13px;
     }
-    #shopBtn:hover { background: #4ade80; }
+    #startWaveBtn:hover { background: #4ade80; }
 
-    #menuOverlay, #shopOverlay {
+    #overlay {
       position: absolute;
       inset: 0;
       display: none;
@@ -82,7 +104,7 @@
       margin-bottom: 8px;
       font-size: 13px;
     }
-    button {
+    .panel button {
       padding: 6px 12px;
       border-radius: 6px;
       border: none;
@@ -92,355 +114,335 @@
       cursor: pointer;
       font-size: 13px;
     }
-    button:hover { background: #4ade80; }
-
-    .shopItem {
-      text-align: left;
-      margin: 6px 0;
-      padding: 6px;
-      border-radius: 6px;
-      background: #020617;
-      border: 1px solid #374151;
-      font-size: 12px;
-    }
-    .shopItem button {
-      float: right;
-      padding: 3px 8px;
-      font-size: 11px;
-    }
-    .shopItem span {
-      display: block;
-      color: #9ca3af;
-      margin-top: 2px;
-    }
+    .panel button:hover { background: #4ade80; }
   </style>
 </head>
 <body>
 
-<h1>Neon Dash Runner</h1>
-<p>SPACE / CLICK to jump • Avoid obstacles • Collect orbs • Buy upgrades in the shop.</p>
+<h1>Stick TD Lite</h1>
+<p>Click a tower, then click near the path to place it • Stop the stick enemies from reaching the end.</p>
 
 <div id="gameContainer">
-  <canvas id="game" width="900" height="400"></canvas>
+  <canvas id="game" width="900" height="500"></canvas>
 
   <div id="hud">
-    <div>Distance: <span id="distText">0</span> m</div>
-    <div>Orbs: <span id="orbText">0</span></div>
-    <div>Best: <span id="bestText">0</span> m</div>
+    <div>Lives: <span id="livesText">20</span></div>
+    <div>Money: <span id="moneyText">100</span></div>
+    <div>Wave: <span id="waveText">1</span></div>
   </div>
 
-  <button id="shopBtn">Shop</button>
-
-  <div id="menuOverlay">
+  <div id="overlay">
     <div class="panel">
-      <h2 id="menuTitle">Neon Dash Runner</h2>
-      <p id="menuSubtitle">Survive, collect orbs, and upgrade your runner.</p>
-      <p style="margin-top:6px;">SPACE / CLICK to jump • Avoid red blocks • Grab blue orbs.</p>
-      <button id="playBtn">Play</button>
+      <h2 id="overlayTitle">Stick TD Lite</h2>
+      <p id="overlayText">Place towers and defend the path.</p>
+      <button id="overlayBtn">Play</button>
     </div>
   </div>
+</div>
 
-  <div id="shopOverlay">
-    <div class="panel">
-      <h2>Upgrade Shop</h2>
-      <p>Orbs: <span id="shopOrbs">0</span></p>
-
-      <div class="shopItem">
-        Jump Boost (Level <span id="jumpLevel">1</span>)
-        <button data-upgrade="jump">Buy</button>
-        <span>Higher jump. Cost: <span id="jumpCost">20</span> orbs</span>
-      </div>
-
-      <div class="shopItem">
-        Double Jump (Level <span id="djLevel">0</span>)
-        <button data-upgrade="doubleJump">Buy</button>
-        <span>Unlock a second jump in air. Cost: <span id="djCost">60</span> orbs</span>
-      </div>
-
-      <div class="shopItem">
-        Shield (Level <span id="shieldLevel">0</span>)
-        <button data-upgrade="shield">Buy</button>
-        <span>Start with a shield that blocks 1 hit. Cost: <span id="shieldCost">80</span> orbs</span>
-      </div>
-
-      <div style="margin-top:10px;">
-        <button id="closeShopBtn">Close</button>
-      </div>
-    </div>
-  </div>
+<div id="bottomBar">
+  <button class="towerBtn" data-type="basic">
+    Basic Tower ($50)
+    <span>Decent range, normal damage.</span>
+  </button>
+  <button class="towerBtn" data-type="sniper">
+    Sniper Tower ($90)
+    <span>Long range, high damage, slow.</span>
+  </button>
+  <button class="towerBtn" data-type="rapid">
+    Rapid Tower ($80)
+    <span>Short range, fast fire.</span>
+  </button>
+  <button id="startWaveBtn">Start Wave</button>
 </div>
 
 <script>
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
 
-  const distText = document.getElementById('distText');
-  const orbText = document.getElementById('orbText');
-  const bestText = document.getElementById('bestText');
-  const menuOverlay = document.getElementById('menuOverlay');
-  const menuTitle = document.getElementById('menuTitle');
-  const menuSubtitle = document.getElementById('menuSubtitle');
-  const playBtn = document.getElementById('playBtn');
-  const shopBtn = document.getElementById('shopBtn');
-  const shopOverlay = document.getElementById('shopOverlay');
-  const shopOrbs = document.getElementById('shopOrbs');
+  const livesText = document.getElementById('livesText');
+  const moneyText = document.getElementById('moneyText');
+  const waveText = document.getElementById('waveText');
 
-  const jumpLevelSpan = document.getElementById('jumpLevel');
-  const jumpCostSpan = document.getElementById('jumpCost');
-  const djLevelSpan = document.getElementById('djLevel');
-  const djCostSpan = document.getElementById('djCost');
-  const shieldLevelSpan = document.getElementById('shieldLevel');
-  const shieldCostSpan = document.getElementById('shieldCost');
+  const overlay = document.getElementById('overlay');
+  const overlayTitle = document.getElementById('overlayTitle');
+  const overlayText = document.getElementById('overlayText');
+  const overlayBtn = document.getElementById('overlayBtn');
 
-  const closeShopBtn = document.getElementById('closeShopBtn');
-  const shopItemButtons = shopOverlay.querySelectorAll('.shopItem button');
+  const towerButtons = document.querySelectorAll('.towerBtn');
+  const startWaveBtn = document.getElementById('startWaveBtn');
 
-  let gameRunning = false;
   let lastTime = performance.now();
+  let gameRunning = false;
+  let placingTowerType = null;
 
-  const groundY = canvas.height - 60;
-
-  const player = {
-    x: 120,
-    y: groundY,
-    w: 32,
-    h: 32,
-    vy: 0,
-    gravity: 0.6,
-    jumpForceBase: 11,
-    jumpForce: 11,
-    onGround: true,
-    jumpsUsed: 0,
-    maxJumps: 1,
-    hasShield: false,
-    shieldActive: false,
-    color: '#22c55e'
-  };
-
-  let distance = 0;
-  let bestDistance = 0;
-  let orbs = 0;
-
-  const upgrades = {
-    jumpLevel: 1,
-    jumpCost: 20,
-    doubleJumpLevel: 0,
-    doubleJumpCost: 60,
-    shieldLevel: 0,
-    shieldCost: 80
-  };
-
-  let speed = 6;
-  let speedTimer = 0;
-
-  let obstacles = [];
-  let orbsList = [];
+  let lives = 20;
+  let money = 100;
+  let wave = 1;
+  let waveInProgress = false;
+  let enemiesToSpawn = 0;
   let spawnTimer = 0;
-  let orbSpawnTimer = 0;
 
-  let inputJump = false;
+  const path = [
+    { x: -40, y: 250 },
+    { x: 150, y: 250 },
+    { x: 150, y: 120 },
+    { x: 400, y: 120 },
+    { x: 400, y: 380 },
+    { x: 700, y: 380 },
+    { x: 700, y: 200 },
+    { x: 940, y: 200 }
+  ];
 
-  function resetRun() {
-    player.y = groundY;
-    player.vy = 0;
-    player.onGround = true;
-    player.jumpsUsed = 0;
-    player.maxJumps = upgrades.doubleJumpLevel > 0 ? 2 : 1;
-    player.jumpForce = player.jumpForceBase + (upgrades.jumpLevel - 1) * 1.5;
-    player.shieldActive = upgrades.shieldLevel > 0;
-    distance = 0;
-    speed = 6;
-    speedTimer = 0;
-    obstacles = [];
-    orbsList = [];
+  const enemies = [];
+  const towers = [];
+  const bullets = [];
+
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+
+  function getPointOnPath(progress) {
+    const segCount = path.length - 1;
+    const total = segCount;
+    const pos = progress * total;
+    const idx = Math.floor(pos);
+    const t = pos - idx;
+    const i = Math.min(idx, segCount - 1);
+    const p1 = path[i];
+    const p2 = path[i + 1];
+    return {
+      x: lerp(p1.x, p2.x, t),
+      y: lerp(p1.y, p2.y, t)
+    };
   }
 
   function startGame() {
-    resetRun();
+    lives = 20;
+    money = 100;
+    wave = 1;
+    waveInProgress = false;
+    enemies.length = 0;
+    towers.length = 0;
+    bullets.length = 0;
+    updateHUD();
+    overlay.style.display = 'none';
     gameRunning = true;
-    menuOverlay.style.display = 'none';
   }
 
-  function endGame() {
+  function gameOver() {
     gameRunning = false;
-    if (distance > bestDistance) bestDistance = Math.floor(distance);
-    bestText.textContent = bestDistance;
-    menuTitle.textContent = 'Game Over';
-    menuSubtitle.textContent = `You reached ${Math.floor(distance)} m and collected ${orbs} orbs total.`;
-    menuOverlay.style.display = 'flex';
+    overlayTitle.textContent = 'Game Over';
+    overlayText.textContent = `You reached wave ${wave}.`;
+    overlayBtn.textContent = 'Play Again';
+    overlay.style.display = 'flex';
   }
 
-  function openShop() {
-    shopOrbs.textContent = orbs;
-    jumpLevelSpan.textContent = upgrades.jumpLevel;
-    jumpCostSpan.textContent = upgrades.jumpCost;
-    djLevelSpan.textContent = upgrades.doubleJumpLevel;
-    djCostSpan.textContent = upgrades.doubleJumpCost;
-    shieldLevelSpan.textContent = upgrades.shieldLevel;
-    shieldCostSpan.textContent = upgrades.shieldCost;
-    shopOverlay.style.display = 'flex';
+  function updateHUD() {
+    livesText.textContent = lives;
+    moneyText.textContent = money;
+    waveText.textContent = wave;
   }
 
-  function closeShop() {
-    shopOverlay.style.display = 'none';
+  function startWave() {
+    if (waveInProgress || !gameRunning) return;
+    waveInProgress = true;
+    enemiesToSpawn = 8 + wave * 2;
+    spawnTimer = 0;
   }
 
-  shopItemButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const type = btn.getAttribute('data-upgrade');
-      if (type === 'jump') {
-        if (orbs >= upgrades.jumpCost) {
-          orbs -= upgrades.jumpCost;
-          upgrades.jumpLevel++;
-          upgrades.jumpCost = Math.floor(upgrades.jumpCost * 1.7);
-          player.jumpForce = player.jumpForceBase + (upgrades.jumpLevel - 1) * 1.5;
-        }
-      } else if (type === 'doubleJump') {
-        if (upgrades.doubleJumpLevel === 0 && orbs >= upgrades.doubleJumpCost) {
-          orbs -= upgrades.doubleJumpCost;
-          upgrades.doubleJumpLevel = 1;
-          player.maxJumps = 2;
-          upgrades.doubleJumpCost = 0;
-        }
-      } else if (type === 'shield') {
-        if (orbs >= upgrades.shieldCost) {
-          orbs -= upgrades.shieldCost;
-          upgrades.shieldLevel++;
-          upgrades.shieldCost = Math.floor(upgrades.shieldCost * 1.8);
-        }
+  function spawnEnemy() {
+    const hp = 10 + wave * 3;
+    const speed = 0.03 + wave * 0.002;
+    enemies.push({
+      progress: 0,
+      hp,
+      maxHp: hp,
+      speed,
+      reward: 8 + wave * 2
+    });
+  }
+
+  function placeTower(x, y, type) {
+    const costMap = { basic: 50, sniper: 90, rapid: 80 };
+    if (money < costMap[type]) return;
+
+    const margin = 30;
+    if (x < margin || x > canvas.width - margin || y < margin || y > canvas.height - margin) return;
+
+    const pathWidth = 60;
+    for (let i = 0; i < path.length - 1; i++) {
+      const p1 = path[i];
+      const p2 = path[i + 1];
+      const minX = Math.min(p1.x, p2.x) - pathWidth;
+      const maxX = Math.max(p1.x, p2.x) + pathWidth;
+      const minY = Math.min(p1.y, p2.y) - pathWidth;
+      const maxY = Math.max(p1.y, p2.y) + pathWidth;
+      if (x > minX && x < maxX && y > minY && y < maxY) {
+        return;
       }
-      openShop();
-      orbText.textContent = orbs;
-    });
-  });
-
-  playBtn.addEventListener('click', startGame);
-  shopBtn.addEventListener('click', openShop);
-  closeShopBtn.addEventListener('click', closeShop);
-
-  window.addEventListener('keydown', e => {
-    if (e.code === 'Space') {
-      e.preventDefault();
-      inputJump = true;
     }
-  });
-  window.addEventListener('keyup', e => {
-    if (e.code === 'Space') inputJump = false;
-  });
-  canvas.addEventListener('mousedown', () => inputJump = true);
-  canvas.addEventListener('mouseup', () => inputJump = false);
 
-  function spawnObstacle() {
-    const height = 30 + Math.random() * 40;
-    const width = 30 + Math.random() * 40;
-    obstacles.push({
-      x: canvas.width + 40,
-      y: groundY + 32 - height,
-      w: width,
-      h: height,
-      color: '#ef4444'
+    money -= costMap[type];
+
+    let stats;
+    if (type === 'basic') {
+      stats = { range: 130, fireRate: 700, damage: 6, color: '#22c55e' };
+    } else if (type === 'sniper') {
+      stats = { range: 260, fireRate: 1400, damage: 18, color: '#38bdf8' };
+    } else if (type === 'rapid') {
+      stats = { range: 110, fireRate: 250, damage: 3, color: '#f97316' };
+    }
+
+    towers.push({
+      x, y,
+      type,
+      range: stats.range,
+      fireRate: stats.fireRate,
+      damage: stats.damage,
+      color: stats.color,
+      lastShot: 0
     });
+
+    updateHUD();
   }
 
-  function spawnOrb() {
-    const y = groundY - (40 + Math.random() * 80);
-    orbsList.push({
-      x: canvas.width + 40,
-      y: y,
-      r: 8,
-      color: '#38bdf8'
+  towerButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      towerButtons.forEach(b => b.classList.remove('selected'));
+      const type = btn.getAttribute('data-type');
+      if (placingTowerType === type) {
+        placingTowerType = null;
+      } else {
+        placingTowerType = type;
+        btn.classList.add('selected');
+      }
     });
-  }
+  });
 
-  function rectIntersect(a, b) {
-    return a.x < b.x + b.w &&
-           a.x + a.w > b.x &&
-           a.y < b.y + b.h &&
-           a.y + a.h > b.y;
-  }
+  canvas.addEventListener('click', e => {
+    if (!placingTowerType) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    placeTower(x, y, placingTowerType);
+  });
 
-  function circleRectIntersect(circle, rect) {
-    const closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.w));
-    const closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.h));
-    const dx = circle.x - closestX;
-    const dy = circle.y - closestY;
-    return dx * dx + dy * dy < circle.r * circle.r;
-  }
+  startWaveBtn.addEventListener('click', startWave);
+  overlayBtn.addEventListener('click', startGame);
 
   function update(delta) {
     if (!gameRunning) return;
 
-    const dt = delta / 16.67;
+    const dt = delta;
 
-    speedTimer += delta;
-    if (speedTimer > 2000) {
-      speedTimer = 0;
-      speed += 0.2;
-    }
-
-    if (inputJump) {
-      if (player.onGround || player.jumpsUsed < player.maxJumps) {
-        player.vy = -player.jumpForce;
-        player.onGround = false;
-        player.jumpsUsed++;
-        inputJump = false;
+    if (waveInProgress) {
+      spawnTimer += dt;
+      if (spawnTimer > 600 && enemiesToSpawn > 0) {
+        spawnTimer = 0;
+        spawnEnemy();
+        enemiesToSpawn--;
+      }
+      if (enemiesToSpawn <= 0 && enemies.length === 0) {
+        waveInProgress = false;
+        wave++;
+        updateHUD();
       }
     }
 
-    player.vy += player.gravity * dt;
-    player.y += player.vy * dt;
-
-    if (player.y >= groundY) {
-      player.y = groundY;
-      player.vy = 0;
-      player.onGround = true;
-      player.jumpsUsed = 0;
-    }
-
-    spawnTimer += delta;
-    if (spawnTimer > 900) {
-      spawnTimer = 0;
-      spawnObstacle();
-    }
-
-    orbSpawnTimer += delta;
-    if (orbSpawnTimer > 1200) {
-      orbSpawnTimer = 0;
-      spawnOrb();
-    }
-
-    obstacles.forEach(o => o.x -= speed * dt);
-    orbsList.forEach(o => o.x -= speed * dt);
-
-    obstacles = obstacles.filter(o => o.x + o.w > -50);
-    orbsList = orbsList.filter(o => o.x + o.r > -50);
-
-    const playerRect = { x: player.x, y: player.y, w: player.w, h: player.h };
-
-    for (let i = obstacles.length - 1; i >= 0; i--) {
-      const o = obstacles[i];
-      if (rectIntersect(playerRect, o)) {
-        if (player.shieldActive) {
-          player.shieldActive = false;
-          obstacles.splice(i, 1);
-        } else {
-          endGame();
+    for (let i = enemies.length - 1; i >= 0; i--) {
+      const e = enemies[i];
+      e.progress += e.speed * (dt / 16.67);
+      if (e.progress >= 1) {
+        enemies.splice(i, 1);
+        lives--;
+        if (lives <= 0) {
+          lives = 0;
+          updateHUD();
+          gameOver();
           return;
         }
+        updateHUD();
       }
     }
 
-    for (let i = orbsList.length - 1; i >= 0; i--) {
-      const orb = orbsList[i];
-      if (circleRectIntersect({ x: orb.x, y: orb.y, r: orb.r }, playerRect)) {
-        orbs += 5;
-        orbsList.splice(i, 1);
+    towers.forEach(t => {
+      t.lastShot += dt;
+      if (t.lastShot < t.fireRate) return;
+
+      let target = null;
+      let bestProgress = -1;
+      enemies.forEach(e => {
+        const pos = getPointOnPath(e.progress);
+        const dx = pos.x - t.x;
+        const dy = pos.y - t.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist <= t.range && e.progress > bestProgress) {
+          bestProgress = e.progress;
+          target = { enemy: e, pos };
+        }
+      });
+
+      if (target) {
+        t.lastShot = 0;
+        const angle = Math.atan2(target.pos.y - t.y, target.pos.x - t.x);
+        bullets.push({
+          x: t.x,
+          y: t.y,
+          vx: Math.cos(angle) * 0.6,
+          vy: Math.sin(angle) * 0.6,
+          damage: t.damage,
+          target: target.enemy
+        });
+      }
+    });
+
+    for (let i = bullets.length - 1; i >= 0; i--) {
+      const b = bullets[i];
+      if (!enemies.includes(b.target)) {
+        bullets.splice(i, 1);
+        continue;
+      }
+      const pos = getPointOnPath(b.target.progress);
+      const dx = pos.x - b.x;
+      const dy = pos.y - b.y;
+      const dist = Math.hypot(dx, dy);
+      const speed = 0.9 * (delta / 16.67);
+      if (dist < 6) {
+        b.target.hp -= b.damage;
+        if (b.target.hp <= 0) {
+          const reward = b.target.reward;
+          money += reward;
+          enemies.splice(enemies.indexOf(b.target), 1);
+          updateHUD();
+        }
+        bullets.splice(i, 1);
+      } else {
+        b.x += (dx / dist) * speed * 16.67;
+        b.y += (dy / dist) * speed * 16.67;
       }
     }
+  }
 
-    distance += speed * dt * 0.4;
-    distText.textContent = Math.floor(distance);
-    orbText.textContent = orbs;
+  function drawPath() {
+    ctx.lineWidth = 40;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#111827';
+    ctx.beginPath();
+    ctx.moveTo(path[0].x, path[0].y);
+    for (let i = 1; i < path.length; i++) {
+      ctx.lineTo(path[i].x, path[i].y);
+    }
+    ctx.stroke();
+
+    ctx.lineWidth = 18;
+    ctx.strokeStyle = '#1f2937';
+    ctx.beginPath();
+    ctx.moveTo(path[0].x, path[0].y);
+    for (let i = 1; i < path.length; i++) {
+      ctx.lineTo(path[i].x, path[i].y);
+    }
+    ctx.stroke();
   }
 
   function draw() {
@@ -452,38 +454,50 @@
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.strokeStyle = '#111827';
-    ctx.lineWidth = 1;
-    for (let x = 0; x < canvas.width; x += 40) {
+    drawPath();
+
+    towers.forEach(t => {
       ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, canvas.height);
+      ctx.strokeStyle = 'rgba(148,163,184,0.15)';
+      ctx.lineWidth = 1;
+      ctx.arc(t.x, t.y, t.range, 0, Math.PI * 2);
       ctx.stroke();
-    }
 
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, groundY + 32, canvas.width, canvas.height - groundY - 32);
-
-    ctx.fillStyle = '#22c55e';
-    ctx.fillRect(player.x, player.y, player.w, player.h);
-
-    if (player.shieldActive) {
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 3;
+      ctx.fillStyle = t.color;
       ctx.beginPath();
-      ctx.roundRect(player.x - 4, player.y - 4, player.w + 8, player.h + 8, 6);
-      ctx.stroke();
-    }
-
-    ctx.fillStyle = '#ef4444';
-    obstacles.forEach(o => {
-      ctx.fillRect(o.x, o.y, o.w, o.h);
+      ctx.arc(t.x, t.y, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(t.x - 4, t.y - 10, 8, 20);
     });
 
-    ctx.fillStyle = '#38bdf8';
-    orbsList.forEach(o => {
+    enemies.forEach(e => {
+      const pos = getPointOnPath(e.progress);
+      ctx.strokeStyle = '#e5e7eb';
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2);
+      ctx.moveTo(pos.x, pos.y - 10);
+      ctx.lineTo(pos.x, pos.y + 10);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y - 4);
+      ctx.lineTo(pos.x - 6, pos.y + 4);
+      ctx.moveTo(pos.x, pos.y - 4);
+      ctx.lineTo(pos.x + 6, pos.y + 4);
+      ctx.stroke();
+
+      const hpRatio = e.hp / e.maxHp;
+      const barW = 26;
+      ctx.fillStyle = '#111827';
+      ctx.fillRect(pos.x - barW / 2, pos.y - 20, barW, 4);
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect(pos.x - barW / 2, pos.y - 20, barW * hpRatio, 4);
+    });
+
+    bullets.forEach(b => {
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
       ctx.fill();
     });
   }
@@ -496,7 +510,7 @@
     requestAnimationFrame(loop);
   }
 
-  menuOverlay.style.display = 'flex';
+  overlay.style.display = 'flex';
   requestAnimationFrame(loop);
 </script>
 
