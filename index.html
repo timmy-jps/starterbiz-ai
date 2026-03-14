@@ -2,21 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Stick TD Lite</title>
+  <title>Neon Subway Runner</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #020617;
+      background: radial-gradient(circle at top, #0f172a 0, #020617 55%, #000 100%);
       color: #e5e7eb;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
     h1 {
-      margin: 12px 0 4px;
+      margin: 10px 0 2px;
       text-align: center;
     }
     p {
@@ -43,42 +43,31 @@
     }
     #hud div { margin-bottom: 2px; }
 
-    #bottomBar {
-      margin-top: 8px;
-      display: flex;
-      gap: 8px;
+    #topRight {
+      position: absolute;
+      top: 8px;
+      right: 8px;
       font-size: 13px;
+      text-shadow: 0 0 4px #000;
+      display: flex;
+      gap: 6px;
+      align-items: center;
     }
-    .towerBtn {
-      padding: 6px 10px;
-      border-radius: 6px;
-      border: 1px solid #4b5563;
-      background: #0f172a;
-      color: #e5e7eb;
-      cursor: pointer;
-    }
-    .towerBtn.selected {
-      border-color: #22c55e;
-      box-shadow: 0 0 6px #22c55e;
-    }
-    .towerBtn span {
-      display: block;
-      font-size: 11px;
-      color: #9ca3af;
-    }
-    #startWaveBtn {
-      padding: 6px 12px;
+    #shopBtn, #pauseBtn {
+      padding: 4px 8px;
       border-radius: 6px;
       border: none;
       background: #22c55e;
       color: #022c22;
       font-weight: bold;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
     }
-    #startWaveBtn:hover { background: #4ade80; }
+    #pauseBtn { background: #38bdf8; color: #02131f; }
+    #shopBtn:hover { background: #4ade80; }
+    #pauseBtn:hover { background: #0ea5e9; }
 
-    #overlay {
+    #overlay, #shopOverlay {
       position: absolute;
       inset: 0;
       display: none;
@@ -91,7 +80,7 @@
       border-radius: 10px;
       border: 1px solid #4b5563;
       padding: 16px 18px;
-      width: 260px;
+      width: 280px;
       max-width: 90vw;
       text-align: center;
     }
@@ -115,391 +104,630 @@
       font-size: 13px;
     }
     .panel button:hover { background: #4ade80; }
+
+    .shopItem {
+      text-align: left;
+      margin: 6px 0;
+      padding: 6px;
+      border-radius: 6px;
+      background: #020617;
+      border: 1px solid #374151;
+      font-size: 12px;
+    }
+    .shopItem button {
+      float: right;
+      padding: 3px 8px;
+      font-size: 11px;
+    }
+    .shopItem span {
+      display: block;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    #controlsHint {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #6b7280;
+    }
   </style>
 </head>
 <body>
 
-<h1>Stick TD Lite</h1>
-<p>Click a tower, then click near the path to place it • Stop the stick enemies from reaching the end.</p>
+<h1>Neon Subway Runner</h1>
+<p>Swipe / A-D / ← → to change lane • W / ↑ / swipe up to jump • S / ↓ / swipe down to slide.</p>
+<div id="controlsHint">Collect coins, avoid trains, buy upgrades and skins.</div>
 
 <div id="gameContainer">
   <canvas id="game" width="900" height="500"></canvas>
 
   <div id="hud">
-    <div>Lives: <span id="livesText">20</span></div>
-    <div>Money: <span id="moneyText">100</span></div>
-    <div>Wave: <span id="waveText">1</span></div>
+    <div>Score: <span id="scoreText">0</span></div>
+    <div>Best: <span id="bestText">0</span></div>
+    <div>Coins: <span id="coinsText">0</span></div>
+  </div>
+
+  <div id="topRight">
+    <button id="shopBtn">Shop</button>
+    <button id="pauseBtn">Pause</button>
   </div>
 
   <div id="overlay">
     <div class="panel">
-      <h2 id="overlayTitle">Stick TD Lite</h2>
-      <p id="overlayText">Place towers and defend the path.</p>
+      <h2 id="overlayTitle">Neon Subway Runner</h2>
+      <p id="overlayText">Dodge trains, collect coins, and upgrade your runner.</p>
+      <p style="margin-top:4px;">A/D or ← → to move • W/↑ to jump • S/↓ to slide.</p>
       <button id="overlayBtn">Play</button>
     </div>
   </div>
-</div>
 
-<div id="bottomBar">
-  <button class="towerBtn" data-type="basic">
-    Basic Tower ($50)
-    <span>Decent range, normal damage.</span>
-  </button>
-  <button class="towerBtn" data-type="sniper">
-    Sniper Tower ($90)
-    <span>Long range, high damage, slow.</span>
-  </button>
-  <button class="towerBtn" data-type="rapid">
-    Rapid Tower ($80)
-    <span>Short range, fast fire.</span>
-  </button>
-  <button id="startWaveBtn">Start Wave</button>
+  <div id="shopOverlay">
+    <div class="panel">
+      <h2>Runner Shop</h2>
+      <p>Coins: <span id="shopCoins">0</span></p>
+
+      <div class="shopItem">
+        Coin Magnet (Level <span id="magnetLevel">0</span>)
+        <button data-upgrade="magnet">Buy</button>
+        <span>Pulls nearby coins. Cost: <span id="magnetCost">80</span></span>
+      </div>
+
+      <div class="shopItem">
+        Shield Start (Level <span id="shieldLevel">0</span>)
+        <button data-upgrade="shield">Buy</button>
+        <span>Start each run with a shield. Cost: <span id="shieldCost">100</span></span>
+      </div>
+
+      <div class="shopItem">
+        Speed Control (Level <span id="speedLevel">0</span>)
+        <button data-upgrade="speed">Buy</button>
+        <span>Slower speed ramp. Cost: <span id="speedCost">120</span></span>
+      </div>
+
+      <div class="shopItem">
+        Skin: Neon Red (Owned: <span id="skinRedOwned">No</span>)
+        <button data-upgrade="skinRed">Buy</button>
+        <span>Change runner color to red. Cost: <span id="skinRedCost">60</span></span>
+      </div>
+
+      <div style="margin-top:10px; clear: both;">
+        <button id="closeShopBtn">Close</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
 
-  const livesText = document.getElementById('livesText');
-  const moneyText = document.getElementById('moneyText');
-  const waveText = document.getElementById('waveText');
+  const scoreText = document.getElementById('scoreText');
+  const bestText = document.getElementById('bestText');
+  const coinsText = document.getElementById('coinsText');
 
   const overlay = document.getElementById('overlay');
   const overlayTitle = document.getElementById('overlayTitle');
   const overlayText = document.getElementById('overlayText');
   const overlayBtn = document.getElementById('overlayBtn');
 
-  const towerButtons = document.querySelectorAll('.towerBtn');
-  const startWaveBtn = document.getElementById('startWaveBtn');
+  const shopOverlay = document.getElementById('shopOverlay');
+  const shopBtn = document.getElementById('shopBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const shopCoins = document.getElementById('shopCoins');
+
+  const magnetLevelSpan = document.getElementById('magnetLevel');
+  const magnetCostSpan = document.getElementById('magnetCost');
+  const shieldLevelSpan = document.getElementById('shieldLevel');
+  const shieldCostSpan = document.getElementById('shieldCost');
+  const speedLevelSpan = document.getElementById('speedLevel');
+  const speedCostSpan = document.getElementById('speedCost');
+  const skinRedOwnedSpan = document.getElementById('skinRedOwned');
+  const skinRedCostSpan = document.getElementById('skinRedCost');
+
+  const closeShopBtn = document.getElementById('closeShopBtn');
+  const shopItemButtons = shopOverlay.querySelectorAll('.shopItem button');
 
   let lastTime = performance.now();
   let gameRunning = false;
-  let placingTowerType = null;
+  let gamePaused = false;
 
-  let lives = 20;
-  let money = 100;
-  let wave = 1;
-  let waveInProgress = false;
-  let enemiesToSpawn = 0;
-  let spawnTimer = 0;
+  const lanes = [canvas.width / 2 - 120, canvas.width / 2, canvas.width / 2 + 120];
+  const groundY = canvas.height - 80;
 
-  const path = [
-    { x: -40, y: 250 },
-    { x: 150, y: 250 },
-    { x: 150, y: 120 },
-    { x: 400, y: 120 },
-    { x: 400, y: 380 },
-    { x: 700, y: 380 },
-    { x: 700, y: 200 },
-    { x: 940, y: 200 }
-  ];
+  const player = {
+    laneIndex: 1,
+    x: lanes[1],
+    y: groundY,
+    w: 40,
+    h: 70,
+    vy: 0,
+    gravity: 0.9,
+    jumpForce: 18,
+    isJumping: false,
+    isSliding: false,
+    slideTimer: 0,
+    baseColor: '#22c55e',
+    color: '#22c55e',
+    shield: false,
+    magnetRadius: 0
+  };
 
-  const enemies = [];
-  const towers = [];
-  const bullets = [];
+  let score = 0;
+  let bestScore = 0;
+  let coins = 0;
 
-  function lerp(a, b, t) {
-    return a + (b - a) * t;
-  }
+  const upgrades = {
+    magnetLevel: 0,
+    magnetCost: 80,
+    shieldLevel: 0,
+    shieldCost: 100,
+    speedLevel: 0,
+    speedCost: 120,
+    skinRedOwned: false,
+    skinRedCost: 60
+  };
 
-  function getPointOnPath(progress) {
-    const segCount = path.length - 1;
-    const total = segCount;
-    const pos = progress * total;
-    const idx = Math.floor(pos);
-    const t = pos - idx;
-    const i = Math.min(idx, segCount - 1);
-    const p1 = path[i];
-    const p2 = path[i + 1];
-    return {
-      x: lerp(p1.x, p2.x, t),
-      y: lerp(p1.y, p2.y, t)
-    };
+  let speed = 8;
+  let speedTimer = 0;
+  let speedRampBase = 0.002;
+
+  const obstacles = [];
+  const coinsList = [];
+  const powerups = [];
+
+  let obstacleTimer = 0;
+  let coinTimer = 0;
+  let powerupTimer = 0;
+
+  let inputLeft = false;
+  let inputRight = false;
+  let inputJump = false;
+  let inputSlide = false;
+
+  let touchStartX = null;
+  let touchStartY = null;
+
+  function resetRun() {
+    player.laneIndex = 1;
+    player.x = lanes[1];
+    player.y = groundY;
+    player.vy = 0;
+    player.isJumping = false;
+    player.isSliding = false;
+    player.slideTimer = 0;
+    player.color = upgrades.skinRedOwned ? '#ef4444' : player.baseColor;
+    player.shield = upgrades.shieldLevel > 0;
+    player.magnetRadius = upgrades.magnetLevel > 0 ? 120 : 0;
+
+    score = 0;
+    speed = 8;
+    speedTimer = 0;
+    obstacles.length = 0;
+    coinsList.length = 0;
+    powerups.length = 0;
+    obstacleTimer = 0;
+    coinTimer = 0;
+    powerupTimer = 0;
   }
 
   function startGame() {
-    lives = 20;
-    money = 100;
-    wave = 1;
-    waveInProgress = false;
-    enemies.length = 0;
-    towers.length = 0;
-    bullets.length = 0;
-    updateHUD();
-    overlay.style.display = 'none';
+    resetRun();
     gameRunning = true;
+    gamePaused = false;
+    overlay.style.display = 'none';
   }
 
-  function gameOver() {
+  function endGame() {
     gameRunning = false;
+    if (score > bestScore) bestScore = Math.floor(score);
+    bestText.textContent = bestScore;
     overlayTitle.textContent = 'Game Over';
-    overlayText.textContent = `You reached wave ${wave}.`;
+    overlayText.textContent = `Score: ${Math.floor(score)} • Coins: ${coins}`;
     overlayBtn.textContent = 'Play Again';
     overlay.style.display = 'flex';
   }
 
-  function updateHUD() {
-    livesText.textContent = lives;
-    moneyText.textContent = money;
-    waveText.textContent = wave;
+  function openShop() {
+    if (gameRunning) gamePaused = true;
+    shopCoins.textContent = coins;
+    magnetLevelSpan.textContent = upgrades.magnetLevel;
+    magnetCostSpan.textContent = upgrades.magnetCost;
+    shieldLevelSpan.textContent = upgrades.shieldLevel;
+    shieldCostSpan.textContent = upgrades.shieldCost;
+    speedLevelSpan.textContent = upgrades.speedLevel;
+    speedCostSpan.textContent = upgrades.speedCost;
+    skinRedOwnedSpan.textContent = upgrades.skinRedOwned ? 'Yes' : 'No';
+    skinRedCostSpan.textContent = upgrades.skinRedCost;
+    shopOverlay.style.display = 'flex';
   }
 
-  function startWave() {
-    if (waveInProgress || !gameRunning) return;
-    waveInProgress = true;
-    enemiesToSpawn = 8 + wave * 2;
-    spawnTimer = 0;
+  function closeShop() {
+    shopOverlay.style.display = 'none';
+    if (gameRunning) gamePaused = false;
   }
 
-  function spawnEnemy() {
-    const hp = 10 + wave * 3;
-    const speed = 0.03 + wave * 0.002;
-    enemies.push({
-      progress: 0,
-      hp,
-      maxHp: hp,
-      speed,
-      reward: 8 + wave * 2
-    });
-  }
-
-  function placeTower(x, y, type) {
-    const costMap = { basic: 50, sniper: 90, rapid: 80 };
-    if (money < costMap[type]) return;
-
-    const margin = 30;
-    if (x < margin || x > canvas.width - margin || y < margin || y > canvas.height - margin) return;
-
-    const pathWidth = 60;
-    for (let i = 0; i < path.length - 1; i++) {
-      const p1 = path[i];
-      const p2 = path[i + 1];
-      const minX = Math.min(p1.x, p2.x) - pathWidth;
-      const maxX = Math.max(p1.x, p2.x) + pathWidth;
-      const minY = Math.min(p1.y, p2.y) - pathWidth;
-      const maxY = Math.max(p1.y, p2.y) + pathWidth;
-      if (x > minX && x < maxX && y > minY && y < maxY) {
-        return;
-      }
-    }
-
-    money -= costMap[type];
-
-    let stats;
-    if (type === 'basic') {
-      stats = { range: 130, fireRate: 700, damage: 6, color: '#22c55e' };
-    } else if (type === 'sniper') {
-      stats = { range: 260, fireRate: 1400, damage: 18, color: '#38bdf8' };
-    } else if (type === 'rapid') {
-      stats = { range: 110, fireRate: 250, damage: 3, color: '#f97316' };
-    }
-
-    towers.push({
-      x, y,
-      type,
-      range: stats.range,
-      fireRate: stats.fireRate,
-      damage: stats.damage,
-      color: stats.color,
-      lastShot: 0
-    });
-
-    updateHUD();
-  }
-
-  towerButtons.forEach(btn => {
+  shopItemButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      towerButtons.forEach(b => b.classList.remove('selected'));
-      const type = btn.getAttribute('data-type');
-      if (placingTowerType === type) {
-        placingTowerType = null;
-      } else {
-        placingTowerType = type;
-        btn.classList.add('selected');
+      const type = btn.getAttribute('data-upgrade');
+      if (type === 'magnet') {
+        if (coins >= upgrades.magnetCost) {
+          coins -= upgrades.magnetCost;
+          upgrades.magnetLevel++;
+          upgrades.magnetCost = Math.floor(upgrades.magnetCost * 1.8);
+          player.magnetRadius = 120;
+        }
+      } else if (type === 'shield') {
+        if (coins >= upgrades.shieldCost) {
+          coins -= upgrades.shieldCost;
+          upgrades.shieldLevel++;
+          upgrades.shieldCost = Math.floor(upgrades.shieldCost * 1.9);
+          player.shield = true;
+        }
+      } else if (type === 'speed') {
+        if (coins >= upgrades.speedCost) {
+          coins -= upgrades.speedCost;
+          upgrades.speedLevel++;
+          upgrades.speedCost = Math.floor(upgrades.speedCost * 2.0);
+          speedRampBase *= 0.7;
+        }
+      } else if (type === 'skinRed') {
+        if (!upgrades.skinRedOwned && coins >= upgrades.skinRedCost) {
+          coins -= upgrades.skinRedCost;
+          upgrades.skinRedOwned = true;
+          player.color = '#ef4444';
+        }
       }
+      coinsText.textContent = coins;
+      openShop();
     });
   });
 
-  canvas.addEventListener('click', e => {
-    if (!placingTowerType) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    placeTower(x, y, placingTowerType);
+  shopBtn.addEventListener('click', openShop);
+  closeShopBtn.addEventListener('click', closeShop);
+
+  pauseBtn.addEventListener('click', () => {
+    if (!gameRunning) return;
+    gamePaused = !gamePaused;
+    pauseBtn.textContent = gamePaused ? 'Resume' : 'Pause';
   });
 
-  startWaveBtn.addEventListener('click', startWave);
   overlayBtn.addEventListener('click', startGame);
 
-  function update(delta) {
-    if (!gameRunning) return;
+  window.addEventListener('keydown', e => {
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA') inputLeft = true;
+    if (e.code === 'ArrowRight' || e.code === 'KeyD') inputRight = true;
+    if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') inputJump = true;
+    if (e.code === 'ArrowDown' || e.code === 'KeyS') inputSlide = true;
+  });
+  window.addEventListener('keyup', e => {
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA') inputLeft = false;
+    if (e.code === 'ArrowRight' || e.code === 'KeyD') inputRight = false;
+    if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') inputJump = false;
+    if (e.code === 'ArrowDown' || e.code === 'KeyS') inputSlide = false;
+  });
 
-    const dt = delta;
-
-    if (waveInProgress) {
-      spawnTimer += dt;
-      if (spawnTimer > 600 && enemiesToSpawn > 0) {
-        spawnTimer = 0;
-        spawnEnemy();
-        enemiesToSpawn--;
-      }
-      if (enemiesToSpawn <= 0 && enemies.length === 0) {
-        waveInProgress = false;
-        wave++;
-        updateHUD();
-      }
+  canvas.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    touchStartX = t.clientX;
+    touchStartY = t.clientY;
+  });
+  canvas.addEventListener('touchend', e => {
+    if (touchStartX === null || touchStartY === null) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+    const threshold = 30;
+    if (absX > absY && absX > threshold) {
+      if (dx > 0) moveRight();
+      else moveLeft();
+    } else if (absY > absX && absY > threshold) {
+      if (dy < 0) triggerJump();
+      else triggerSlide();
     }
+    touchStartX = null;
+    touchStartY = null;
+  });
 
-    for (let i = enemies.length - 1; i >= 0; i--) {
-      const e = enemies[i];
-      e.progress += e.speed * (dt / 16.67);
-      if (e.progress >= 1) {
-        enemies.splice(i, 1);
-        lives--;
-        if (lives <= 0) {
-          lives = 0;
-          updateHUD();
-          gameOver();
-          return;
-        }
-        updateHUD();
-      }
+  function moveLeft() {
+    if (player.laneIndex > 0) {
+      player.laneIndex--;
+      player.x = lanes[player.laneIndex];
     }
-
-    towers.forEach(t => {
-      t.lastShot += dt;
-      if (t.lastShot < t.fireRate) return;
-
-      let target = null;
-      let bestProgress = -1;
-      enemies.forEach(e => {
-        const pos = getPointOnPath(e.progress);
-        const dx = pos.x - t.x;
-        const dy = pos.y - t.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist <= t.range && e.progress > bestProgress) {
-          bestProgress = e.progress;
-          target = { enemy: e, pos };
-        }
-      });
-
-      if (target) {
-        t.lastShot = 0;
-        const angle = Math.atan2(target.pos.y - t.y, target.pos.x - t.x);
-        bullets.push({
-          x: t.x,
-          y: t.y,
-          vx: Math.cos(angle) * 0.6,
-          vy: Math.sin(angle) * 0.6,
-          damage: t.damage,
-          target: target.enemy
-        });
-      }
-    });
-
-    for (let i = bullets.length - 1; i >= 0; i--) {
-      const b = bullets[i];
-      if (!enemies.includes(b.target)) {
-        bullets.splice(i, 1);
-        continue;
-      }
-      const pos = getPointOnPath(b.target.progress);
-      const dx = pos.x - b.x;
-      const dy = pos.y - b.y;
-      const dist = Math.hypot(dx, dy);
-      const speed = 0.9 * (delta / 16.67);
-      if (dist < 6) {
-        b.target.hp -= b.damage;
-        if (b.target.hp <= 0) {
-          const reward = b.target.reward;
-          money += reward;
-          enemies.splice(enemies.indexOf(b.target), 1);
-          updateHUD();
-        }
-        bullets.splice(i, 1);
-      } else {
-        b.x += (dx / dist) * speed * 16.67;
-        b.y += (dy / dist) * speed * 16.67;
-      }
+  }
+  function moveRight() {
+    if (player.laneIndex < lanes.length - 1) {
+      player.laneIndex++;
+      player.x = lanes[player.laneIndex];
+    }
+  }
+  function triggerJump() {
+    if (!player.isJumping && !player.isSliding) {
+      player.isJumping = true;
+      player.vy = -player.jumpForce;
+    }
+  }
+  function triggerSlide() {
+    if (!player.isSliding && !player.isJumping) {
+      player.isSliding = true;
+      player.slideTimer = 400;
     }
   }
 
-  function drawPath() {
-    ctx.lineWidth = 40;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#111827';
-    ctx.beginPath();
-    ctx.moveTo(path[0].x, path[0].y);
-    for (let i = 1; i < path.length; i++) {
-      ctx.lineTo(path[i].x, path[i].y);
-    }
-    ctx.stroke();
+  function spawnObstacle() {
+    const lane = Math.floor(Math.random() * 3);
+    const type = Math.random() < 0.5 ? 'train' : 'barrier';
+    const baseY = groundY;
+    let h = type === 'train' ? 120 : 60;
+    let y = baseY - h + (type === 'train' ? 10 : 0);
+    obstacles.push({
+      lane,
+      x: lanes[lane],
+      y,
+      w: 70,
+      h,
+      type
+    });
+  }
 
-    ctx.lineWidth = 18;
-    ctx.strokeStyle = '#1f2937';
-    ctx.beginPath();
-    ctx.moveTo(path[0].x, path[0].y);
-    for (let i = 1; i < path.length; i++) {
-      ctx.lineTo(path[i].x, path[i].y);
+  function spawnCoinRow() {
+    const lane = Math.floor(Math.random() * 3);
+    const count = 3 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < count; i++) {
+      coinsList.push({
+        lane,
+        x: lanes[lane],
+        y: groundY - 40 - i * 30,
+        r: 10,
+        collected: false
+      });
     }
-    ctx.stroke();
+  }
+
+  function spawnPowerup() {
+    const lane = Math.floor(Math.random() * 3);
+    const kind = Math.random() < 0.5 ? 'shield' : 'magnet';
+    powerups.push({
+      lane,
+      x: lanes[lane],
+      y: groundY - 50,
+      r: 12,
+      kind
+    });
+  }
+
+  function rectIntersect(a, b) {
+    return a.x < b.x + b.w &&
+           a.x + a.w > b.x &&
+           a.y < b.y + b.h &&
+           a.y + a.h > b.y;
+  }
+
+  function update(delta) {
+    if (!gameRunning || gamePaused) return;
+
+    const dt = delta / 16.67;
+
+    speedTimer += delta;
+    if (speedTimer > 1000) {
+      speedTimer = 0;
+      speed += speedRampBase * 1000;
+    }
+
+    if (inputLeft) { moveLeft(); inputLeft = false; }
+    if (inputRight) { moveRight(); inputRight = false; }
+    if (inputJump) { triggerJump(); inputJump = false; }
+    if (inputSlide) { triggerSlide(); inputSlide = false; }
+
+    if (player.isJumping) {
+      player.vy += player.gravity * dt;
+      player.y += player.vy * dt;
+      if (player.y >= groundY) {
+        player.y = groundY;
+        player.vy = 0;
+        player.isJumping = false;
+      }
+    }
+
+    if (player.isSliding) {
+      player.slideTimer -= delta;
+      if (player.slideTimer <= 0) {
+        player.isSliding = false;
+      }
+    }
+
+    obstacleTimer += delta;
+    if (obstacleTimer > 900) {
+      obstacleTimer = 0;
+      spawnObstacle();
+    }
+
+    coinTimer += delta;
+    if (coinTimer > 700) {
+      coinTimer = 0;
+      spawnCoinRow();
+    }
+
+    powerupTimer += delta;
+    if (powerupTimer > 6000) {
+      powerupTimer = 0;
+      spawnPowerup();
+    }
+
+    const moveAmount = speed * dt * 3;
+
+    obstacles.forEach(o => o.y += moveAmount);
+    coinsList.forEach(c => c.y += moveAmount);
+    powerups.forEach(p => p.y += moveAmount);
+
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      if (obstacles[i].y > canvas.height + 100) obstacles.splice(i, 1);
+    }
+    for (let i = coinsList.length - 1; i >= 0; i--) {
+      if (coinsList[i].y > canvas.height + 50 || coinsList[i].collected) coinsList.splice(i, 1);
+    }
+    for (let i = powerups.length - 1; i >= 0; i--) {
+      if (powerups[i].y > canvas.height + 50) powerups.splice(i, 1);
+    }
+
+    const playerRect = {
+      x: player.x - player.w / 2,
+      y: player.y - (player.isSliding ? player.h / 2 : player.h),
+      w: player.w,
+      h: player.isSliding ? player.h / 2 : player.h
+    };
+
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      const o = obstacles[i];
+      if (o.lane !== player.laneIndex) continue;
+      const rect = {
+        x: o.x - o.w / 2,
+        y: o.y,
+        w: o.w,
+        h: o.h
+      };
+      if (rectIntersect(playerRect, rect)) {
+        if (player.shield) {
+          player.shield = false;
+          obstacles.splice(i, 1);
+        } else {
+          endGame();
+          return;
+        }
+      }
+    }
+
+    coinsList.forEach(c => {
+      const dx = (lanes[c.lane]) - player.x;
+      const dy = c.y - (player.y - player.h / 2);
+      const dist = Math.hypot(dx, dy);
+      if (player.magnetRadius > 0 && dist < player.magnetRadius) {
+        c.x -= dx * 0.15;
+        c.y -= dy * 0.15;
+      }
+    });
+
+    coinsList.forEach(c => {
+      const dx = (lanes[c.lane]) - player.x;
+      const dy = c.y - (player.y - player.h / 2);
+      const dist = Math.hypot(dx, dy);
+      if (dist < 30 && !c.collected) {
+        c.collected = true;
+        coins += 1;
+      }
+    });
+
+    for (let i = powerups.length - 1; i >= 0; i--) {
+      const p = powerups[i];
+      if (p.lane !== player.laneIndex) continue;
+      const dx = lanes[p.lane] - player.x;
+      const dy = p.y - (player.y - player.h / 2);
+      const dist = Math.hypot(dx, dy);
+      if (dist < 35) {
+        if (p.kind === 'shield') {
+          player.shield = true;
+        } else if (p.kind === 'magnet') {
+          player.magnetRadius = 150;
+          setTimeout(() => {
+            if (upgrades.magnetLevel === 0) player.magnetRadius = 0;
+          }, 6000);
+        }
+        powerups.splice(i, 1);
+      }
+    }
+
+    score += delta * 0.05;
+    scoreText.textContent = Math.floor(score);
+    coinsText.textContent = coins;
   }
 
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     grad.addColorStop(0, '#020617');
     grad.addColorStop(1, '#020617');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    drawPath();
+    ctx.fillStyle = '#020617';
+    ctx.fillRect(0, groundY + 40, canvas.width, canvas.height - (groundY + 40));
 
-    towers.forEach(t => {
-      ctx.beginPath();
-      ctx.strokeStyle = 'rgba(148,163,184,0.15)';
-      ctx.lineWidth = 1;
-      ctx.arc(t.x, t.y, t.range, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.fillStyle = t.color;
-      ctx.beginPath();
-      ctx.arc(t.x, t.y, 12, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#020617';
-      ctx.fillRect(t.x - 4, t.y - 10, 8, 20);
-    });
-
-    enemies.forEach(e => {
-      const pos = getPointOnPath(e.progress);
-      ctx.strokeStyle = '#e5e7eb';
+    lanes.forEach((laneX, i) => {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(laneX - 70, 0, 140, canvas.height);
+      ctx.strokeStyle = 'rgba(148,163,184,0.2)';
+      ctx.setLineDash([20, 20]);
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(pos.x, pos.y - 10);
-      ctx.lineTo(pos.x, pos.y + 10);
+      ctx.moveTo(laneX, 0);
+      ctx.lineTo(laneX, canvas.height);
       ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(pos.x, pos.y - 4);
-      ctx.lineTo(pos.x - 6, pos.y + 4);
-      ctx.moveTo(pos.x, pos.y - 4);
-      ctx.lineTo(pos.x + 6, pos.y + 4);
-      ctx.stroke();
-
-      const hpRatio = e.hp / e.maxHp;
-      const barW = 26;
-      ctx.fillStyle = '#111827';
-      ctx.fillRect(pos.x - barW / 2, pos.y - 20, barW, 4);
-      ctx.fillStyle = '#22c55e';
-      ctx.fillRect(pos.x - barW / 2, pos.y - 20, barW * hpRatio, 4);
+      ctx.setLineDash([]);
     });
 
-    bullets.forEach(b => {
+    ctx.fillStyle = '#111827';
+    ctx.fillRect(0, groundY + 10, canvas.width, 60);
+
+    obstacles.forEach(o => {
+      ctx.fillStyle = o.type === 'train' ? '#ef4444' : '#f97316';
+      ctx.fillRect(o.x - o.w / 2, o.y, o.w, o.h);
+      if (o.type === 'train') {
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(o.x - o.w / 2 + 8, o.y + 10, o.w - 16, 20);
+      }
+    });
+
+    coinsList.forEach(c => {
       ctx.fillStyle = '#facc15';
       ctx.beginPath();
-      ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#854d0e';
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r * 0.5, 0, Math.PI * 2);
       ctx.fill();
     });
+
+    powerups.forEach(p => {
+      ctx.fillStyle = p.kind === 'shield' ? '#38bdf8' : '#22c55e';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#e5e7eb';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r - 3, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+
+    if (player.magnetRadius > 0) {
+      ctx.strokeStyle = 'rgba(56,189,248,0.25)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y - player.h / 2, player.magnetRadius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = player.color;
+    const px = player.x - player.w / 2;
+    const py = player.y - (player.isSliding ? player.h / 2 : player.h);
+    const ph = player.isSliding ? player.h / 2 : player.h;
+    ctx.fillRect(px, py, player.w, ph);
+
+    ctx.fillStyle = '#e5e7eb';
+    ctx.beginPath();
+    ctx.arc(player.x, py + 12, 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (player.shield) {
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.roundRect(px - 6, py - 6, player.w + 12, ph + 12, 10);
+      ctx.stroke();
+    }
   }
 
   function loop(time) {
